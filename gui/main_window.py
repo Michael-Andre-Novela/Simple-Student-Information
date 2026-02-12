@@ -10,7 +10,7 @@ class MainWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("Student Information System v2.0")
+        self.title("Student Information System")
         self.geometry("1100x600")
 
         # Configure Grid Layout (1x2)
@@ -36,10 +36,10 @@ class MainWindow(ctk.CTk):
         # --- Main Content Area ---
         self.content_frame = ctk.CTkFrame(self, corner_radius=10)
         self.content_frame.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
-        
+    
         # Default view
         self.show_students_view()
-
+    
     def clear_content(self):
         for widget in self.content_frame.winfo_children():
             widget.destroy()
@@ -54,14 +54,30 @@ class MainWindow(ctk.CTk):
         style.theme_use("default")
         style.configure("Treeview", background="#2b2b2b", foreground="white", fieldbackground="#2b2b2b", borderwidth=0)
         style.map("Treeview", background=[('selected', '#1f538d')])
-
+        style.configure("Treeview", rowheight=30) # Makes rows taller and easier to read
         # The Table
         columns = ("id", "firstname", "lastname", "program", "year")
         self.tree = ttk.Treeview(self.content_frame, columns=columns, show="headings")
-        
+        self.tree.column("id", width=120, stretch=True, anchor="w")
+        self.tree.column("firstname", width=150, stretch=True, anchor="w")
+        self.tree.column("lastname", width=150, stretch=True, anchor="w")
+        self.tree.column("program", width=100, stretch=True, anchor="center")
+        self.tree.column("year", width=80, stretch=True, anchor="center")
+
         for col in columns:
             self.tree.heading(col, text=col.upper())
-            self.tree.column(col, width=150)
+            
+        
+        # show data
+        data = read_csv("students")
+        for s in data:
+              self.tree.insert("", "end", values=(
+         s.get('id'), 
+         s.get('firstname'), 
+         s.get('lastname'), 
+         s.get('program_code'), 
+         s.get('year')
+          ))
         
         self.tree.pack(expand=True, fill="both", padx=20, pady=10)
 
@@ -72,10 +88,67 @@ class MainWindow(ctk.CTk):
     def show_programs_view(self):
         self.clear_content()
         ctk.CTkLabel(self.content_frame, text="Program Management").pack(pady=20)
+        style = ttk.Style()
+        style.theme_use("default")
+        style.configure("Treeview", background="#2b2b2b", foreground="white", fieldbackground="#2b2b2b", borderwidth=0)
+        style.map("Treeview", background=[('selected', '#1f538d')])
+        style.configure("Treeview", rowheight=30) 
+        
+        columns = ("code", "name", "college")
+        self.tree = ttk.Treeview(self.content_frame, columns=columns, show="headings")
+        self.tree.column("code", width=120, stretch=True, anchor="w")
+        self.tree.column("name", width=150, stretch=True, anchor="w")
+        self.tree.column("college", width=150, stretch=True, anchor="w")
+        
+        for col in columns:
+            self.tree.heading(col, text=col.upper())
+            
+        #show data
+        data = read_csv("programs")
+        for s in data:
+              self.tree.insert("", "end", values=(
+         s.get('code'), 
+         s.get('name'), 
+         s.get('college') 
+          ))
+        
+        self.tree.pack(expand=True, fill="both", padx=20, pady=10)
+
+        # Bottom Buttons
+        btn_add = ctk.CTkButton(self.content_frame, text="Add Program", fg_color="green", hover_color="#006400")
+        btn_add.pack(side="left", padx=30, pady=20)
 
     def show_colleges_view(self):
         self.clear_content()
         ctk.CTkLabel(self.content_frame, text="College Management").pack(pady=20)
+        style = ttk.Style()
+        style.theme_use("default")
+        style.configure("Treeview", background="#2b2b2b", foreground="white", fieldbackground="#2b2b2b", borderwidth=0)
+        style.map("Treeview", background=[('selected', '#1f538d')])
+        style.configure("Treeview", rowheight=30)
+
+        columns = ("code", "name")
+        self.tree = ttk.Treeview(self.content_frame, columns=columns, show="headings")
+        self.tree.column("code", width=120, stretch=True, anchor="w")
+        self.tree.column("name", width=150, stretch=True, anchor="w")
+        
+        for col in columns:
+            self.tree.heading(col, text=col.upper())
+            
+        
+        #show data
+        data = read_csv("colleges")
+        for s in data:
+              self.tree.insert("", "end", values=(
+         s.get('code'), 
+         s.get('name') 
+          ))
+        
+        self.tree.pack(expand=True, fill="both", padx=20, pady=10)
+    
+        # Bottom Buttons
+        btn_add = ctk.CTkButton(self.content_frame, text="Add College", fg_color="green", hover_color="#006400")
+        btn_add.pack(side="left", padx=30, pady=20)
 
 if __name__ == "__main__":
     app = MainWindow()
