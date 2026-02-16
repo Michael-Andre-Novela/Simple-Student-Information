@@ -48,7 +48,47 @@ class MainWindow(ctk.CTk):
         self.clear_content()
         label = ctk.CTkLabel(self.content_frame, text="Student Records", font=ctk.CTkFont(size=24, weight="bold"))
         label.pack(pady=20)
+        # --- Top Control Bar ---
+        top_container = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+        top_container.pack(fill="x", padx=20, pady=(10, 0)) # Added top padding for breathing room
 
+        # 1. Primary Action (Left side)
+        btn_add = ctk.CTkButton(top_container, text="+ Add Student", width=120, fg_color="green", hover_color="#006400")
+        btn_add.pack(side="left", padx=5)
+
+        # 2. Sorting Controls (Right side)
+        # Defining sort_options locally here is fine
+        sort_options = {
+            "ID": "id",
+            "First Name": "firstname", 
+            "Last Name": "lastname", 
+            "Program Code": "program_code", 
+            "Year": "year"
+        }
+        
+        self.sort_var = ctk.StringVar(value="ID")
+
+        # Sort Button - Placed on the far right
+        btn_sort = ctk.CTkButton(
+            top_container, 
+            text="Sort", 
+            width=80,
+            command=lambda: self.sort_view_data(
+                "students", 
+                sort_options[self.sort_var.get()], 
+                ["id", "firstname", "lastname", "program_code", "year"]
+            )
+        )
+        btn_sort.pack(side="right", padx=5)
+
+        # Dropdown - Placed next to the Sort button
+        sort_menu = ctk.CTkOptionMenu(top_container, values=list(sort_options.keys()), variable=self.sort_var, width=140)
+        sort_menu.pack(side="right", padx=5)
+
+        # Optional: Label for clarity
+        sort_label = ctk.CTkLabel(top_container, text="Sort by:")
+        sort_label.pack(side="right", padx=2)
+                        
         # Treeview Styles (to make it match Dark Mode)
         style = ttk.Style()
         style.theme_use("default")
@@ -89,40 +129,6 @@ class MainWindow(ctk.CTk):
           ))
         
         self.tree.pack(expand=True, fill="both", padx=20, pady=10)
-
-        # Bottom Buttons
-        # Button Container for better alignment
-        btn_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
-        btn_frame.pack(side="bottom", fill="x", padx=30, pady=20)
-
-        btn_add = ctk.CTkButton(btn_frame, text="Add Student", fg_color="green", hover_color="#006400")
-        btn_add.pack(side="left", padx=5)
-
-        # Dropdown to choose which column to sort
-        sort_options = {
-                 "ID":"id",
-                 "First Name": "firstname", 
-                 "Last Name":"lastname", 
-                 "Progam Code":"program_code", 
-                 "Year":"year"}
-        
-        self.sort_var = ctk.StringVar(value="ID") # Default value
-        
-        sort_menu = ctk.CTkOptionMenu(btn_frame, values=list(sort_options.keys()), variable=self.sort_var)
-        sort_menu.pack(side="left", padx=10)
-
-        # The Sort Button now uses the variable from the menu
-        btn_sort = ctk.CTkButton(
-            btn_frame, 
-            text="Sort", 
-            command=lambda: self.sort_view_data(
-                "students", 
-                sort_options[self.sort_var.get()], 
-                ["id", "firstname", "lastname", "program_code", "year"]
-            )
-        )
-        btn_sort.pack(side="left", padx=5)
-
 
     def show_programs_view(self):
         self.clear_content()
