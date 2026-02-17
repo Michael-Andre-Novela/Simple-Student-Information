@@ -52,11 +52,20 @@ class MainWindow(ctk.CTk):
         top_container = ctk.CTkFrame(self.content_frame, fg_color="transparent")
         top_container.pack(fill="x", padx=20, pady=(10, 0)) # Added top padding for breathing room
 
-        # 1. Primary Action (Left side)
+        # Primary Action (Left side)
         btn_add = ctk.CTkButton(top_container, text="+ Add Student", width=120, fg_color="green", hover_color="#006400")
         btn_add.pack(side="left", padx=5)
+        
+        #search bar (Left side, next to Add button)
 
-        # 2. Sorting Controls (Right side)
+        self.search_entry = ctk.CTkEntry(top_container, placeholder_text="Search students...", width=250)
+        self.search_entry.pack(side="left", padx=10)
+
+        btn_search = ctk.CTkButton(top_container, text="Search", width=80, 
+                                   command=lambda: self.search_view_data("students", ["id", "firstname", "lastname", "program_code", "year"]))
+        btn_search.pack(side="left", padx=5)
+
+        # Sorting Controls (Right side)
         # Defining sort_options locally here is fine
         sort_options = {
             "ID": "id",
@@ -102,14 +111,14 @@ class MainWindow(ctk.CTk):
         container = ctk.CTkFrame(self.content_frame)
         container.pack(expand=True, fill="both", padx=20, pady=10)
 
-        # 2. The Table (Inside the container)
+        # The Table (Inside the container)
         self.tree = ttk.Treeview(container, columns=columns, show="headings")
         
-        # 3. The Scrollbar
+        # The Scrollbar
         scrollbar = ttk.Scrollbar(container, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scrollbar.set)
 
-        # 4. Pack side-by-side
+        # Pack side-by-side
         scrollbar.pack(side="right", fill="y")
         self.tree.pack(side="left", expand=True, fill="both")
         
@@ -144,14 +153,14 @@ class MainWindow(ctk.CTk):
         container = ctk.CTkFrame(self.content_frame)
         container.pack(expand=True, fill="both", padx=20, pady=10)
         
-        # 2. The Table (Inside the container)
+        # The Table (Inside the container)
         self.tree = ttk.Treeview(container, columns=columns, show="headings")
         
-        # 3. The Scrollbar
+        # The Scrollbar
         scrollbar = ttk.Scrollbar(container, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scrollbar.set)
 
-        # 4. Pack side-by-side
+        # Pack side-by-side
         scrollbar.pack(side="right", fill="y")
         self.tree.pack(side="left", expand=True, fill="both")
 
@@ -199,14 +208,14 @@ class MainWindow(ctk.CTk):
         container = ctk.CTkFrame(self.content_frame)
         container.pack(expand=True, fill="both", padx=20, pady=10)
 
-        # 2. The Table (Inside the container)
+        # The Table (Inside the container)
         self.tree = ttk.Treeview(container, columns=columns, show="headings")
         
-        # 3. The Scrollbar
+        # The Scrollbar
         scrollbar = ttk.Scrollbar(container, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scrollbar.set)
 
-        # 4. Pack side-by-side
+        # Pack side-by-side
         scrollbar.pack(side="right", fill="y")
         self.tree.pack(side="left", expand=True, fill="both")
         
@@ -252,6 +261,30 @@ class MainWindow(ctk.CTk):
         for s in sorted_data:
             row_values = [s.get(k, "") for k in display_keys]
             self.tree.insert("", "end", values=row_values)
+    def search_view_data(self, file_key, display_keys):
+        # Get the query from the entry
+        query = self.search_entry.get().lower()
+        
+        # Get all data
+        all_data = read_csv(file_key)
+        
+        # Filter the data (Checks if query exists in ANY field)
+        filtered_data = []
+        for row in all_data:
+            # Join all values in the row into one string to search everything at once
+            row_content = " ".join(str(value) for value in row.values()).lower()
+            if query in row_content:
+                filtered_data.append(row)
+
+        # Clear the Treeview
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
+        # Re-populate with matches
+        for s in filtered_data:
+            row_values = [s.get(k, "") for k in display_keys]
+            self.tree.insert("", "end", values=row_values)
+
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()
