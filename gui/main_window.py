@@ -9,6 +9,7 @@ ctk.set_default_color_theme("blue")
 class MainWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.current_data = read_csv("students")
 
         self.title("Student Information System")
         self.geometry("1100x600")
@@ -56,15 +57,38 @@ class MainWindow(ctk.CTk):
         btn_add = ctk.CTkButton(top_container, text="+ Add Student", width=120, fg_color="green", hover_color="#006400")
         btn_add.pack(side="left", padx=5)
         
-        #search bar (Left side, next to Add button)
+         #search bar (Left side, next to Add button)
 
+# 1. Search Entry
         self.search_entry = ctk.CTkEntry(top_container, placeholder_text="Search students...", width=250)
         self.search_entry.pack(side="left", padx=10)
 
-        btn_search = ctk.CTkButton(top_container, text="Search", width=80, 
-                                   command=lambda: self.search_view_data("students", ["id", "firstname", "lastname", "program_code", "year"]))
-        btn_search.pack(side="left", padx=5)
+        # 2. Search Options Mapping
+        search_options = {
+            "ID": "id",
+            "First Name": "firstname", 
+            "Last Name": "lastname", 
+            "Program Code": "program_code", 
+            "Year": "year"
+        }
 
+        # 3. Dropdown (Variable must be created BEFORE the button uses it in lambda)
+        self.search_var = ctk.StringVar(value="ID")
+        search_menu = ctk.CTkOptionMenu(top_container, values=list(search_options.keys()), variable=self.search_var, width=140)
+        search_menu.pack(side="left", padx=5)
+
+        # 4. Search Button (Now passing search_options)
+        btn_search = ctk.CTkButton(
+            top_container, 
+            text="Search", 
+            width=80, 
+            command=lambda: self.search_view_data(
+                "students", 
+                search_options, # Pass the dictionary here!
+                ["id", "firstname", "lastname", "program_code", "year"]
+            )
+        )
+        btn_search.pack(side="left", padx=7)
         # Sorting Controls (Right side)
         # Defining sort_options locally here is fine
         sort_options = {
@@ -252,39 +276,37 @@ class MainWindow(ctk.CTk):
         btn_sort.pack(side="left", padx=35,pady=20)
    
     def sort_view_data(self, file_key, sort_col, display_keys):
-        data = read_csv(file_key)
-        sorted_data=sort(file_key, sort_col)
+        self.current_data.sort(key=lambda x: str(x.get(sort_col, "")).lower())
 
-        for item in self.tree.get_children():
-            self.tree.delete(item)
+        # Update the table
+        self.refresh_table(display_keys)
+   
+    def search_view_data(self, file_key, search_map, display_keys):
+        query = self.search_entry.get().strip().lower()
+        selected_pretty_name = self.search_var.get()
+        column_to_search = search_map[selected_pretty_name]
 
-        for s in sorted_data:
-            row_values = [s.get(k, "") for k in display_keys]
-            self.tree.insert("", "end", values=row_values)
-    def search_view_data(self, file_key, display_keys):
-        # Get the query from the entry
-        query = self.search_entry.get().lower()
-        
-        # Get all data
         all_data = read_csv(file_key)
         
-        # Filter the data (Checks if query exists in ANY field)
-        filtered_data = []
-        for row in all_data:
-            # Join all values in the row into one string to search everything at once
-            row_content = " ".join(str(value) for value in row.values()).lower()
-            if query in row_content:
-                filtered_data.append(row)
+        # We save the filtered results to self.current_data
+        self.current_data = [
+            row for row in all_data 
+            if query in str(row.get(column_to_search, "")).lower()
+        ]
 
+        # Update the table
+        self.refresh_table(display_keys)
+   
+    def refresh_table(self, display_keys):
         # Clear the Treeview
         for item in self.tree.get_children():
             self.tree.delete(item)
 
-        # Re-populate with matches
-        for s in filtered_data:
+        # Re-populate with whatever is in self.current_data
+        for s in self.current_data:
+            # This logic matches your existing student/program/college keys
             row_values = [s.get(k, "") for k in display_keys]
             self.tree.insert("", "end", values=row_values)
-
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()
