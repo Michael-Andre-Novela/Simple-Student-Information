@@ -88,3 +88,8 @@ def update_csv(file_key, id_value,updated_row, id_column='id' ):
             new_list.append(row)
     write_csv(file_key, new_list)
     return new_list
+
+def sort(file_key, sort_by_column, reverse=False):
+    data=read_csv(file_key)
+    return sorted(data, key=lambda x: x[sort_by_column].lower(),reverse=reverse)
+    

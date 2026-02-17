@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from tkinter import ttk
-from modules.database_io import read_csv
+from modules.database_io import read_csv, sort
 
 # Set the appearance mode and color theme
 ctk.set_appearance_mode("dark") 
@@ -48,40 +48,71 @@ class MainWindow(ctk.CTk):
         self.clear_content()
         label = ctk.CTkLabel(self.content_frame, text="Student Records", font=ctk.CTkFont(size=24, weight="bold"))
         label.pack(pady=20)
+        # --- Top Control Bar ---
+        top_container = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+        top_container.pack(fill="x", padx=20, pady=(10, 0)) # Added top padding for breathing room
 
+        # 1. Primary Action (Left side)
+        btn_add = ctk.CTkButton(top_container, text="+ Add Student", width=120, fg_color="green", hover_color="#006400")
+        btn_add.pack(side="left", padx=5)
+
+        # 2. Sorting Controls (Right side)
+        # Defining sort_options locally here is fine
+        sort_options = {
+            "ID": "id",
+            "First Name": "firstname", 
+            "Last Name": "lastname", 
+            "Program Code": "program_code", 
+            "Year": "year"
+        }
+        
+        self.sort_var = ctk.StringVar(value="ID")
+
+        # Sort Button - Placed on the far right
+        btn_sort = ctk.CTkButton(
+            top_container, 
+            text="Sort", 
+            width=80,
+            command=lambda: self.sort_view_data(
+                "students", 
+                sort_options[self.sort_var.get()], 
+                ["id", "firstname", "lastname", "program_code", "year"]
+            )
+        )
+        btn_sort.pack(side="right", padx=5)
+
+        # Dropdown - Placed next to the Sort button
+        sort_menu = ctk.CTkOptionMenu(top_container, values=list(sort_options.keys()), variable=self.sort_var, width=140)
+        sort_menu.pack(side="right", padx=5)
+
+        # Optional: Label for clarity
+        sort_label = ctk.CTkLabel(top_container, text="Sort by:")
+        sort_label.pack(side="right", padx=2)
+                        
         # Treeview Styles (to make it match Dark Mode)
         style = ttk.Style()
         style.theme_use("default")
         style.configure("Treeview", background="#2b2b2b", foreground="white", fieldbackground="#2b2b2b", borderwidth=0)
         style.map("Treeview", background=[('selected', '#1f538d')])
         style.configure("Treeview", rowheight=30) # Makes rows taller and easier to read
-        # Search Container
-        search_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
-        search_frame.pack(fill="x", padx=20, pady=10)
-
-        # Dropdown to choose which field to search in
-        search_map = {"All": "all", "ID": "id", "First Name": "firstname", "Last Name": "lastname"}
-        self.search_col_var = ctk.StringVar(value="All")
-        search_menu = ctk.CTkOptionMenu(search_frame, values=list(search_map.keys()), variable=self.search_col_var, width=120)
-        search_menu.pack(side="left", padx=5)
-
-        # Search Entry
-        self.search_entry = ctk.CTkEntry(search_frame, placeholder_text="Search student...", width=300)
-        self.search_entry.pack(side="left", padx=5)
-
-        # Search Button
-        btn_search = ctk.CTkButton(search_frame, text="Search", width=80, 
-                                   command=lambda: self.search_view_data("students", ["id", "firstname", "lastname", "program_code", "year"]))
-        btn_search.pack(side="left", padx=5)
+        
+        
         # The Table
         columns = ("id", "firstname", "lastname", "program", "year")
-        self.tree = ttk.Treeview(self.content_frame, columns=columns, show="headings")
-        self.tree.column("id", width=120, stretch=True, anchor="w")
-        self.tree.column("firstname", width=150, stretch=True, anchor="w")
-        self.tree.column("lastname", width=150, stretch=True, anchor="w")
-        self.tree.column("program", width=100, stretch=True, anchor="center")
-        self.tree.column("year", width=80, stretch=True, anchor="center")
+        container = ctk.CTkFrame(self.content_frame)
+        container.pack(expand=True, fill="both", padx=20, pady=10)
 
+        # 2. The Table (Inside the container)
+        self.tree = ttk.Treeview(container, columns=columns, show="headings")
+        
+        # 3. The Scrollbar
+        scrollbar = ttk.Scrollbar(container, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+
+        # 4. Pack side-by-side
+        scrollbar.pack(side="right", fill="y")
+        self.tree.pack(side="left", expand=True, fill="both")
+        
         for col in columns:
             self.tree.heading(col, text=col.upper())
             
@@ -99,10 +130,6 @@ class MainWindow(ctk.CTk):
         
         self.tree.pack(expand=True, fill="both", padx=20, pady=10)
 
-        # Bottom Buttons
-        btn_add = ctk.CTkButton(self.content_frame, text="Add Student", fg_color="green", hover_color="#006400")
-        btn_add.pack(side="left", padx=30, pady=20)
-
     def show_programs_view(self):
         self.clear_content()
         ctk.CTkLabel(self.content_frame, text="Program Management").pack(pady=20)
@@ -110,14 +137,24 @@ class MainWindow(ctk.CTk):
         style.theme_use("default")
         style.configure("Treeview", background="#2b2b2b", foreground="white", fieldbackground="#2b2b2b", borderwidth=0)
         style.map("Treeview", background=[('selected', '#1f538d')])
-        style.configure("Treeview", rowheight=30) 
+        style.configure("Treeview", rowheight=30)
         
         columns = ("code", "name", "college")
-        self.tree = ttk.Treeview(self.content_frame, columns=columns, show="headings")
-        self.tree.column("code", width=120, stretch=True, anchor="w")
-        self.tree.column("name", width=150, stretch=True, anchor="w")
-        self.tree.column("college", width=150, stretch=True, anchor="w")
+
+        container = ctk.CTkFrame(self.content_frame)
+        container.pack(expand=True, fill="both", padx=20, pady=10)
         
+        # 2. The Table (Inside the container)
+        self.tree = ttk.Treeview(container, columns=columns, show="headings")
+        
+        # 3. The Scrollbar
+        scrollbar = ttk.Scrollbar(container, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+
+        # 4. Pack side-by-side
+        scrollbar.pack(side="right", fill="y")
+        self.tree.pack(side="left", expand=True, fill="both")
+
         for col in columns:
             self.tree.heading(col, text=col.upper())
             
@@ -136,6 +173,19 @@ class MainWindow(ctk.CTk):
         btn_add = ctk.CTkButton(self.content_frame, text="Add Program", fg_color="green", hover_color="#006400")
         btn_add.pack(side="left", padx=30, pady=20)
 
+        btn_sort = ctk.CTkButton(
+    self.content_frame, 
+    text="Sort", 
+    fg_color="green", 
+    hover_color="#006400",
+    command=lambda: self.sort_view_data(
+        "programs", 
+        "name", 
+        ["code", "name", "college"]
+    )
+)
+        btn_sort.pack(side="left", padx=35,pady=20)
+
     def show_colleges_view(self):
         self.clear_content()
         ctk.CTkLabel(self.content_frame, text="College Management").pack(pady=20)
@@ -146,9 +196,20 @@ class MainWindow(ctk.CTk):
         style.configure("Treeview", rowheight=30)
 
         columns = ("code", "name")
-        self.tree = ttk.Treeview(self.content_frame, columns=columns, show="headings")
-        self.tree.column("code", width=120, stretch=True, anchor="w")
-        self.tree.column("name", width=150, stretch=True, anchor="w")
+        container = ctk.CTkFrame(self.content_frame)
+        container.pack(expand=True, fill="both", padx=20, pady=10)
+
+        # 2. The Table (Inside the container)
+        self.tree = ttk.Treeview(container, columns=columns, show="headings")
+        
+        # 3. The Scrollbar
+        scrollbar = ttk.Scrollbar(container, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+
+        # 4. Pack side-by-side
+        scrollbar.pack(side="right", fill="y")
+        self.tree.pack(side="left", expand=True, fill="both")
+        
         
         for col in columns:
             self.tree.heading(col, text=col.upper())
@@ -167,7 +228,30 @@ class MainWindow(ctk.CTk):
         # Bottom Buttons
         btn_add = ctk.CTkButton(self.content_frame, text="Add College", fg_color="green", hover_color="#006400")
         btn_add.pack(side="left", padx=30, pady=20)
+        
+        btn_sort = ctk.CTkButton(
+    self.content_frame, 
+    text="Sort", 
+    fg_color="green", 
+    hover_color="#006400",
+    command=lambda: self.sort_view_data(
+        "colleges", 
+        "name", 
+        ["code", "name"]
+    )
+)
+        btn_sort.pack(side="left", padx=35,pady=20)
+   
+    def sort_view_data(self, file_key, sort_col, display_keys):
+        data = read_csv(file_key)
+        sorted_data=sort(file_key, sort_col)
 
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
+        for s in sorted_data:
+            row_values = [s.get(k, "") for k in display_keys]
+            self.tree.insert("", "end", values=row_values)
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()
