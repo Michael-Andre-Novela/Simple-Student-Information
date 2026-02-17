@@ -275,36 +275,48 @@ class MainWindow(ctk.CTk):
 )
         btn_sort.pack(side="left", padx=35,pady=20)
    
-    def sort_view_data(self, file_key, sort_col, display_keys):
+    def sort_view_data(self, sort_col, display_keys):
+        # 1. Check if the search buffer exists
+        if not hasattr(self, 'current_data') or not self.current_data:
+            return
+
+        # 2. Sort the search results ONLY
+        # This keeps the "First Letter" filter intact
         self.current_data.sort(key=lambda x: str(x.get(sort_col, "")).lower())
 
-        # Update the table
+        # 3. Push sorted results to UI
         self.refresh_table(display_keys)
    
     def search_view_data(self, file_key, search_map, display_keys):
+        # 1. Clean up the input
         query = self.search_entry.get().strip().lower()
-        selected_pretty_name = self.search_var.get()
-        column_to_search = search_map[selected_pretty_name]
+        column_to_search = search_map[self.search_var.get()]
 
+        # 2. Get fresh data from the file
         all_data = read_csv(file_key)
         
-        # We save the filtered results to self.current_data
-        self.current_data = [
-            row for row in all_data 
-            if query in str(row.get(column_to_search, "")).lower()
-        ]
+        if not query:
+            self.current_data = all_data
+        else:
+            self.current_data = []
+            for row in all_data:
+                # Convert cell to string safely
+                cell_value = str(row.get(column_to_search, "")).lower()
+                
+                # CHANGED: Use .startswith() for "First Letter" basis
+                if cell_value.startswith(query):
+                    self.current_data.append(row)
 
-        # Update the table
+        # 3. Update the display
         self.refresh_table(display_keys)
    
     def refresh_table(self, display_keys):
-        # Clear the Treeview
+        # Clear existing rows
         for item in self.tree.get_children():
             self.tree.delete(item)
 
-        # Re-populate with whatever is in self.current_data
+        # Re-populate with filtered/sorted data
         for s in self.current_data:
-            # This logic matches your existing student/program/college keys
             row_values = [s.get(k, "") for k in display_keys]
             self.tree.insert("", "end", values=row_values)
 if __name__ == "__main__":
