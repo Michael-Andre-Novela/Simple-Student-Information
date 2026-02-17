@@ -55,6 +55,24 @@ class MainWindow(ctk.CTk):
         style.configure("Treeview", background="#2b2b2b", foreground="white", fieldbackground="#2b2b2b", borderwidth=0)
         style.map("Treeview", background=[('selected', '#1f538d')])
         style.configure("Treeview", rowheight=30) # Makes rows taller and easier to read
+        # Search Container
+        search_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+        search_frame.pack(fill="x", padx=20, pady=10)
+
+        # Dropdown to choose which field to search in
+        search_map = {"All": "all", "ID": "id", "First Name": "firstname", "Last Name": "lastname"}
+        self.search_col_var = ctk.StringVar(value="All")
+        search_menu = ctk.CTkOptionMenu(search_frame, values=list(search_map.keys()), variable=self.search_col_var, width=120)
+        search_menu.pack(side="left", padx=5)
+
+        # Search Entry
+        self.search_entry = ctk.CTkEntry(search_frame, placeholder_text="Search student...", width=300)
+        self.search_entry.pack(side="left", padx=5)
+
+        # Search Button
+        btn_search = ctk.CTkButton(search_frame, text="Search", width=80, 
+                                   command=lambda: self.search_view_data("students", ["id", "firstname", "lastname", "program_code", "year"]))
+        btn_search.pack(side="left", padx=5)
         # The Table
         columns = ("id", "firstname", "lastname", "program", "year")
         self.tree = ttk.Treeview(self.content_frame, columns=columns, show="headings")

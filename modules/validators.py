@@ -22,10 +22,6 @@ def id_no_already_exists(id_number):
     return True
 
 def validate_student(student_data):
-    """
-    Validates a dictionary of student data.
-    Returns (is_valid, error_message)
-    """
     # 1. Check ID Format (YYYY-NNNN)
     if not re.match(r'^\d{4}-\d{4}$', student_data['id']):
         return False, "ID must be in YYYY-NNNN format (e.g., 2026-0001)."
