@@ -275,16 +275,16 @@ class MainWindow(ctk.CTk):
 )
         btn_sort.pack(side="left", padx=35,pady=20)
    
-    def sort_view_data(self, sort_col, display_keys):
-        # 1. Check if the search buffer exists
+    def sort_view_data(self, file_key, sort_col, display_keys):
+        # Ensure we have a data buffer to sort. Prefer the current search buffer
+        # (so sorting respects an active search); otherwise load fresh data.
         if not hasattr(self, 'current_data') or not self.current_data:
-            return
+            self.current_data = read_csv(file_key)
 
-        # 2. Sort the search results ONLY
-        # This keeps the "First Letter" filter intact
+        # Sort the current buffer by the requested column
         self.current_data.sort(key=lambda x: str(x.get(sort_col, "")).lower())
 
-        # 3. Push sorted results to UI
+        # Push sorted results to UI
         self.refresh_table(display_keys)
    
     def search_view_data(self, file_key, search_map, display_keys):
