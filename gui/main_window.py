@@ -1,3 +1,4 @@
+from tkinter import ttk
 import customtkinter as ctk
 from modules.database_io import read_csv, sort
 
