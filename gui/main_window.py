@@ -1,5 +1,4 @@
 import customtkinter as ctk
-from tkinter import ttk
 from modules.database_io import read_csv, sort
 
 # Set the appearance mode and color theme
