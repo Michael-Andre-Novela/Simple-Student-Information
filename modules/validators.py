@@ -45,5 +45,5 @@ def validate_student(student_data):
 
     if id_no_already_exists(student_data['id']):
         return False, f"ID Number '{student_data['id']}' already exists."
-
+    
     return True, 

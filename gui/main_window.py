@@ -1,6 +1,7 @@
 from tkinter import ttk
 import customtkinter as ctk
 from modules.database_io import read_csv, sort
+from gui.student_forms import open_student_form
 
 # Set the appearance mode and color theme
 ctk.set_appearance_mode("dark") 
@@ -54,7 +55,7 @@ class MainWindow(ctk.CTk):
         top_container.pack(fill="x", padx=20, pady=(10, 0)) # Added top padding for breathing room
 
         # Primary Action (Left side)
-        btn_add = ctk.CTkButton(top_container, text="+ Add Student", width=120, fg_color="green", hover_color="#006400")
+        btn_add = ctk.CTkButton(top_container, text="+ Add Student", width=120, fg_color="green", hover_color="#006400", command= lambda: open_student_form(self))
         btn_add.pack(side="left", padx=5)
         
          #search bar (Left side, next to Add button)
@@ -131,7 +132,7 @@ class MainWindow(ctk.CTk):
         
         
         # The Table
-        columns = ("id", "firstname", "lastname", "program", "year")
+        columns = ("id", "firstname", "lastname", "program", "year", "gender", "college")
         container = ctk.CTkFrame(self.content_frame)
         container.pack(expand=True, fill="both", padx=20, pady=10)
 
@@ -149,17 +150,23 @@ class MainWindow(ctk.CTk):
         for col in columns:
             self.tree.heading(col, text=col.upper())
             
-        
+        programs_list = read_csv("programs")
+        prog_to_col = {p['code']: p.get('college', 'N/A') for p in programs_list}
         # show data
         data = read_csv("students")
         for s in data:
+              student_college = prog_to_col.get(s.get('program_code'), "Unassigned")
+
               self.tree.insert("", "end", values=(
          s.get('id'), 
          s.get('firstname'), 
          s.get('lastname'), 
          s.get('program_code'), 
-         s.get('year')
-          ))
+         s.get('year'),
+         s.get('gender'),
+         student_college
+        ))
+              
         
         self.tree.pack(expand=True, fill="both", padx=20, pady=10)
 
@@ -319,6 +326,7 @@ class MainWindow(ctk.CTk):
         for s in self.current_data:
             row_values = [s.get(k, "") for k in display_keys]
             self.tree.insert("", "end", values=row_values)
+
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()
