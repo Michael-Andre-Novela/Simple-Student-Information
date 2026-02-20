@@ -70,7 +70,9 @@ class MainWindow(ctk.CTk):
             "First Name": "firstname", 
             "Last Name": "lastname", 
             "Program Code": "program_code", 
-            "Year": "year"
+            "Year": "year",
+            "Gender":"gender",
+            "College":"college"
         }
 
         # 3. Dropdown (Variable must be created BEFORE the button uses it in lambda)
@@ -86,7 +88,7 @@ class MainWindow(ctk.CTk):
             command=lambda: self.search_view_data(
                 "students", 
                 search_options, # Pass the dictionary here!
-                ["id", "firstname", "lastname", "program_code", "year"]
+                ["id", "firstname", "lastname", "program_code", "year", "gender","college"]
             )
         )
         btn_search.pack(side="left", padx=7)
@@ -97,7 +99,9 @@ class MainWindow(ctk.CTk):
             "First Name": "firstname", 
             "Last Name": "lastname", 
             "Program Code": "program_code", 
-            "Year": "year"
+            "Year": "year",
+            "Gender":"gender",
+            "College": "college"
         }
         
         self.sort_var = ctk.StringVar(value="ID")
@@ -110,7 +114,7 @@ class MainWindow(ctk.CTk):
             command=lambda: self.sort_view_data(
                 "students", 
                 sort_options[self.sort_var.get()], 
-                ["id", "firstname", "lastname", "program_code", "year"]
+                ["id", "firstname", "lastname", "program_code", "year", "gender", "college"]
             )
         )
         btn_sort.pack(side="right", padx=5)
@@ -119,7 +123,7 @@ class MainWindow(ctk.CTk):
         sort_menu = ctk.CTkOptionMenu(top_container, values=list(sort_options.keys()), variable=self.sort_var, width=140)
         sort_menu.pack(side="right", padx=5)
 
-        # Optional: Label for clarity
+        # Label for clarity
         sort_label = ctk.CTkLabel(top_container, text="Sort by:")
         sort_label.pack(side="right", padx=2)
                         
@@ -128,7 +132,7 @@ class MainWindow(ctk.CTk):
         style.theme_use("default")
         style.configure("Treeview", background="#2b2b2b", foreground="white", fieldbackground="#2b2b2b", borderwidth=0)
         style.map("Treeview", background=[('selected', '#1f538d')])
-        style.configure("Treeview", rowheight=30) # Makes rows taller and easier to read
+        style.configure("Treeview", rowheight=45) # Makes rows taller and easier to read
         
         
         # The Table
@@ -146,13 +150,15 @@ class MainWindow(ctk.CTk):
         # Pack side-by-side
         scrollbar.pack(side="right", fill="y")
         self.tree.pack(side="left", expand=True, fill="both")
-        
+
+        # Define specific widths for each column
         for col in columns:
             self.tree.heading(col, text=col.upper())
-            
+            self.tree.column("firstname", width=200, minwidth=150)
         programs_list = read_csv("programs")
         prog_to_col = {p['code']: p.get('college', 'N/A') for p in programs_list}
-        # show data
+
+
         data = read_csv("students")
         for s in data:
               student_college = prog_to_col.get(s.get('program_code'), "Unassigned")
@@ -287,9 +293,18 @@ class MainWindow(ctk.CTk):
         # (so sorting respects an active search); otherwise load fresh data.
         if not hasattr(self, 'current_data') or not self.current_data:
             self.current_data = read_csv(file_key)
+        # for college header since it's not in the students.csv
 
+        if sort_col == "college":
+            programs_list = read_csv("programs")
+            prog_to_col = {p['code']: p.get('college', 'N/A') for p in programs_list}
+            
+            # Sort based on the looked-up college value
+            self.current_data.sort(key=lambda x: str(prog_to_col.get(x.get('program_code'), "")).lower())
+        else:
+            # 2. Otherwise, sort by the standard keys (id, name, year, etc.)
+            self.current_data.sort(key=lambda x: str(x.get(sort_col, "")).lower())
         # Sort the current buffer by the requested column
-        self.current_data.sort(key=lambda x: str(x.get(sort_col, "")).lower())
 
         # Push sorted results to UI
         self.refresh_table(display_keys)
@@ -318,13 +333,23 @@ class MainWindow(ctk.CTk):
         self.refresh_table(display_keys)
    
     def refresh_table(self, display_keys):
+        #college lookup mapping
+        programs_list = read_csv("programs")
+        prog_to_col = {p['code']: p.get('college', 'N/A') for p in programs_list}
+
         # Clear existing rows
         for item in self.tree.get_children():
             self.tree.delete(item)
 
         # Re-populate with filtered/sorted data
         for s in self.current_data:
-            row_values = [s.get(k, "") for k in display_keys]
+            row_values = []
+            for key in display_keys:
+                if key == "college":
+                    val = prog_to_col.get(s.get('program_code',"Unassigned"))
+                else:
+                    val = s.get(key, "")
+                row_values.append(val)
             self.tree.insert("", "end", values=row_values)
 
 if __name__ == "__main__":
