@@ -1,5 +1,5 @@
 id,firstname,lastname,program_code,year,gender
-2022-0001,Casimir Elijah,Bajarla,BSCS,4,Male
+2022-0001,Casimir Elija,Bajarla,BSCS,4,Male
 2023-0452,Reign,Mejia,BSIT,3,Female
 2023-1122,Jelian,Abanador,BSBA-MM,2,Female
 2024-0099,Jenard,Daquiz,BSEd-PE,1,Male
@@ -12,13 +12,24 @@ id,firstname,lastname,program_code,year,gender
 2024-1323,Andrea May,Avila,BSBA-MM,2,Female
 2021-0012,Marco,Polo,BSCS,4,Male
 2022-0451,Elena,Gilbert,BSN,3,Female
-2023-1092,Satoshi,Nakamoto,BS CyberSec,2,Male
 2024-0005,Anya,Forger,BS Psych,1,Female
-2022-0887,Dante,Alighieri,BA Phil,3,Male
 2021-0332,Beatrix,Kiddo,BS Forensic Sci,4,Female
-2023-0554,Miles,Morales,BSEMC,2,Male
 2024-0121,Luna,Lovegood,BS Bio,1,Female
-2022-0998,Arthur,Morgan,BSBA-MM,3,Male
+2022-0998,Arthur,Morgana,BSBA-MM,3,Female
+2023-1100,Kamala,Khan,BA DevCom,2,Female
+2021-0776,Geralt,Rivia,BSME,4,Male
+2024-0342,Hermione,Granger,BS Stat,1,Female
+2022-0221,Tony,Stark,BS AI,3,Male
+2023-0443,Katniss,Everdeen,BSEd-PE,2,Female
+2024-0889,Bruce,Wayne,BSDA,1,Male
+2021-0665,Lara,Croft,BA Hist,4,Female
+2023-0112,Peter,Parker,BS Applied Physics,2,Male
+2021-0012,Marco,Polo,BSCS,4,Male
+2022-0451,Elena,Gilbert,BSN,3,Female
+2024-0005,Anya,Forger,BS Psych,1,Female
+2021-0332,Beatrix,Kiddo,BS Forensic Sci,4,Female
+2024-0121,Luna,Lovegood,BS Bio,1,Female
+2022-0998,Arthur,Morgana,BSBA-MM,3,Female
 2023-1100,Kamala,Khan,BA DevCom,2,Female
 2021-0776,Geralt,Rivia,BSME,4,Male
 2024-0342,Hermione,Granger,BS Stat,1,Female
@@ -28,5 +39,105 @@ id,firstname,lastname,program_code,year,gender
 2021-0665,Lara,Croft,BA Hist,4,Female
 2023-0112,Peter,Parker,BS Applied Physics,2,Male
 2022-0554,Buffy,Summers,BSN,3,Female
-2024-0002,Steve,Rogers,BA SocSci,1,Male
-2023-0991,Wanda,Maximoff,BS Psych,2,Female
+2024-0230,Naruto,Uzumaki,BSCS,1,Male
+2023-0781,Sakura,Haruno,BS Psych,2,Female
+2022-0345,Sasuke,Uchiha,BS AI,3,Male
+2024-0567,Mikasa,Ackerman,BSME,1,Female
+2023-0892,Eren,Yeager,BSCE,2,Male
+2022-0123,Levi,Ackerman,BS CyberSec,4,Male
+2024-0678,Nezuko,Kamado,BSN,1,Female
+2023-0456,Tanjiro,Kamado,BSCS,2,Male
+2022-0789,Zenitsu,Agatsuma,BSIT,3,Male
+2024-0234,Inosuke,Hashibira,BSME,1,Male
+2023-0567,Gojo,Satoru,BS AI,3,Male
+2022-0890,Megumi,Fushiguro,BSCS,4,Male
+2024-0345,Nobara,Kugisaki,BS Psych,1,Female
+2023-0678,Yuji,Itadori,BSIT,2,Male
+2022-0456,Ryomen,Sukuna,BS CyberSec,4,Male
+2024-0789,Power,Makima,BS Bio,1,Female
+2023-0123,Denji,Chainsaw,BSME,2,Male
+2022-0234,Aki,Hayakawa,BSCS,3,Male
+2024-0901,Reze,Bomb,BS Applied Physics,1,Female
+2023-0345,Edward,Elric,BSCE,2,Male
+2022-0567,Alphonse,Elric,BSIT,3,Male
+2024-0456,Roy,Mustang,BS AI,1,Male
+2023-0789,Winry,Rockbell,BSME,2,Female
+2022-0678,Riza,Hawkeye,BS CyberSec,4,Female
+2024-0123,Izuku,Midoriya,BSCS,1,Male
+2023-0901,Katsuki,Bakugo,BS AI,2,Male
+2022-0345,Shoto,Todoroki,BSIT,3,Male
+2024-0567,Ochaco,Uraraka,BS Psych,1,Female
+2023-0234,Tenya,Iida,BSCE,2,Male
+2022-0789,Momo,Yaoyorozu,BS Applied Physics,4,Female
+2024-0678,Tsuyu,Asui,BS Bio,1,Female
+2023-0456,Eijiro,Kirishima,BSME,2,Male
+2022-0123,Denki,Kaminari,BSIT,3,Male
+2024-0890,Kyoka,Jiro,BA Comm,1,Female
+2023-0567,Fumikage,Tokoyami,BS AI,2,Male
+2022-0901,Shota,Aizawa,BS CyberSec,4,Male
+2024-0234,Toshinori,Yagi,BSCS,1,Male
+2023-0678,Light,Yagami,BS AI,3,Male
+2022-0345,L,Lawliet,BS CyberSec,4,Male
+2024-0456,Misa,Amane,BA Comm,1,Female
+2023-0789,Near,Nate,BSCS,2,Male
+2022-0567,Mello,Keehl,BSIT,3,Male
+2024-0123,Ryuk,Shinigami,BS Applied Physics,1,Male
+2023-0234,Rem,Death,BSN,2,Female
+2022-0678,Lelouch,Lamperouge,BS AI,4,Male
+2024-0901,C.C.,Cheese,BA Phil,1,Female
+2023-0345,Kallen,Stadtfeld,BSME,2,Female
+2022-0789,Suzaku,Kururugi,BSCE,3,Male
+2024-0456,Nunnally,Lamperouge,BS Psych,1,Female
+2023-0567,Gintoki,Sakata,BSBA-MM,2,Male
+2022-0890,Shinpachi,Shimura,BSIT,3,Male
+2024-0678,Kagura,Yato,BS Bio,1,Female
+2023-0123,Hijikata,Toshiro,BS CyberSec,2,Male
+2022-0234,Okita,Sougo,BS AI,3,Male
+2024-0345,Takasugi,Shinsuke,BSCS,1,Male
+2023-0456,Kamui,Space,BSME,2,Male
+2022-0567,Spike,Spiegel,BS AI,4,Male
+2024-0789,Faye,Valentine,BA Comm,1,Female
+2023-0678,Jet,Black,BSIT,2,Male
+2022-0901,Edward,Wong,BS Applied Physics,3,Female
+2024-0234,Ein,Corgi,BS Bio,1,Male
+2023-0345,Vicious,Fearless,BS CyberSec,2,Male
+2022-0456,Julia,Remix,BSN,3,Female
+2024-0567,Johan,Liebert,BS Psych,1,Male
+2023-0890,Anna,Liebert,BS Psych,2,Female
+2022-0123,Tenma,Kenzo,BSCE,4,Male
+2024-0678,Roberto,Nunez,BSIT,1,Male
+2023-0456,Eva,Heinemann,BA Phil,2,Female
+2022-0789,Simon,Gurren,BSME,3,Male
+2024-0123,Yoko,Littner,BS Applied Physics,1,Female
+2023-0234,Kamina,Lagann,BSCS,2,Male
+2022-0345,Nia,Teppelin,BS Psych,3,Female
+2024-0901,Viral,Beastman,BS AI,1,Male
+2023-0567,Rossiu,Adai,BSIT,2,Male
+2022-0678,Lordgenome,Spiral,BSCE,4,Male
+2024-0456,Rei,Ayanami,BS Psych,1,Female
+2023-0789,Shinji,Ikari,BSCS,2,Male
+2022-0890,Asuka,Langley,BS AI,3,Female
+2024-0234,Misato,Katsuragi,BS CyberSec,1,Female
+2023-0123,Gendo,Ikari,BSME,2,Male
+2022-0456,Kaworu,Nagisa,BA Phil,3,Male
+2024-0567,Mari,Makinami,BS Applied Physics,1,Female
+2023-0678,Ritsuko,Akagi,BSN,2,Female
+2022-0901,Ryuk,Omega,BSDA,3,Male
+2024-0345,Alphonse,Gamma,BSBA-MM,1,Male
+2023-0456,Sofia,Reyes,BSEd-Math,2,Female
+2022-0123,Carlos,Mendoza,BSCE,3,Male
+2024-0789,Maria,Santos,BS Bio,1,Female
+2023-0234,Jose,Garcia,BSIT,2,Male
+2022-0567,Ana,Cruz,BSN,4,Female
+2024-0678,Juan,Dela Cruz,BSCS,1,Male
+2023-0890,Rosa,Flores,BS Psych,2,Female
+2022-0345,Miguel,Ramos,BSME,3,Male
+2024-0123,Isabella,Torres,BA Comm,1,Female
+2023-0456,Diego,Vargas,BSIT,2,Male
+2022-0789,Valentina,Morales,BS Applied Physics,3,Female
+2024-0901,Mateo,Jimenez,BSCE,1,Male
+2023-0567,Camila,Herrera,BS Psych,2,Female
+2022-0678,Sebastian,Ruiz,BS AI,4,Male
+2024-0234,Lucia,Gutierrez,BSN,1,Female
+2023-0345,Fernando,Diaz,BSBA-MM,2,Male
+2022-0456,Gabriela,Romero,BSEd-Sci,3,Female
