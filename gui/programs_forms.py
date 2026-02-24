@@ -1,4 +1,6 @@
 import customtkinter as ctk
+from PIL import Image
+import os
 from modules.database_io import read_csv, write_csv
 from modules.validators import validate_program
 
@@ -11,6 +13,10 @@ ACCENT_RED  = "#ef4444"
 TEXT_PRIMARY= "#e6edf3"
 TEXT_MUTED  = "#8b949e"
 BORDER      = "#30363d"
+
+# Get project root for asset paths
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ASSET_LOGO_PATH = os.path.join(PROJECT_ROOT, "assets", "logo.png")
 
 def styled_label(parent, text):
     return ctk.CTkLabel(parent, text=text, font=ctk.CTkFont(size=12),
@@ -102,10 +108,12 @@ def open_program_form(app, edit_data=None):
     header.pack_propagate(False)
     ctk.CTkFrame(header, width=4, fg_color=ACCENT_PURP,
                  corner_radius=0).pack(side="left", fill="y")
+    logo_img = ctk.CTkImage(Image.open(ASSET_LOGO_PATH), size=(48, 48))
+    ctk.CTkLabel(header, image=logo_img, text="", width=48, height=48).pack(side="left", padx=(8, 4))
     ctk.CTkLabel(header,
-                 text="  Edit Program" if is_edit else "  Add Program",
+                 text="Edit Program" if is_edit else "Add Program",
                  font=ctk.CTkFont(size=18, weight="bold"),
-                 text_color=TEXT_PRIMARY).pack(side="left", padx=16)
+                 text_color=TEXT_PRIMARY).pack(side="left", padx=8)
 
     body = ctk.CTkFrame(form, fg_color="transparent")
     body.pack(fill="both", expand=True, padx=28, pady=16)

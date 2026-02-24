@@ -1,6 +1,7 @@
 from tkinter import ttk
 import tkinter as tk
 import customtkinter as ctk
+import os
 from modules.database_io import read_csv
 from gui.student_forms import open_student_form
 from gui.programs_forms import open_program_form
@@ -30,8 +31,12 @@ class MainWindow(ctk.CTk):
         self.current_page  = 1
         self.sort_reverse  = False   # False = ascending, True = descending
         self.configure(fg_color=BG_BASE)
+        
+        # Get the project root directory
+        self.project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.asset_logo_path = os.path.join(self.project_root, "assets", "logo.png")
 
-        self.iconphoto(True, tk.PhotoImage(file="assets/logo.png"))
+        self.iconphoto(True, tk.PhotoImage(file=self.asset_logo_path))
         self.title("Student Information System")
         self.geometry("1200x700")
         self.update_idletasks()
@@ -62,7 +67,7 @@ class MainWindow(ctk.CTk):
 
         brand = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
         brand.pack(fill="x", padx=20, pady=(28, 24))
-        logo_img = ctk.CTkImage(Image.open("assets/logo.png"), size=(48, 48))
+        logo_img = ctk.CTkImage(Image.open(self.asset_logo_path), size=(48, 48))
         ctk.CTkLabel(brand, image=logo_img, text="", width=48, height=48).pack(side="left", padx=(0, 8))
         ctk.CTkLabel(brand, text="  SIS Admin",
                      font=ctk.CTkFont(family="Courier", size=18, weight="bold"),
@@ -93,7 +98,7 @@ class MainWindow(ctk.CTk):
             self.nav_buttons.append((btn, color))
 
         self._bottom_logo_img = ctk.CTkImage(
-            Image.open("assets/logo.png"), size=(120, 120)
+            Image.open(self.asset_logo_path), size=(120, 120)
         )
         ctk.CTkLabel(
             self.sidebar_frame, image=self._bottom_logo_img, text="",
