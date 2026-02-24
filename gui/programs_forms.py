@@ -32,15 +32,69 @@ def styled_option(parent, values, variable, width=340):
                              dropdown_fg_color=BG_INPUT,
                              dropdown_text_color=TEXT_PRIMARY)
 
+def handle_delete(app, edit_data):
+    code = str(edit_data[0])
+    all_students = read_csv("students")
+    affected = [s for s in all_students if s.get('program_code') == code]
+
+    confirm = ctk.CTkToplevel(app)
+    confirm.title("Confirm Delete")
+    confirm.resizable(False, False)
+    confirm.configure(fg_color=BG_FORM)
+    confirm.attributes("-topmost", True)
+    _cw, _ch = 500, 200
+    _cx = (confirm.winfo_screenwidth()  - _cw) // 2
+    _cy = (confirm.winfo_screenheight() - _ch) // 2
+    confirm.geometry(f"{_cw}x{_ch}+{_cx}+{_cy}")
+    confirm.after(100, confirm.grab_set)
+
+    ctk.CTkLabel(confirm, text=f"Delete program '{code}'?",
+                 font=ctk.CTkFont(size=15, weight="bold"),
+                 text_color=TEXT_PRIMARY).pack(pady=(24, 4))
+    msg = (f"⚠  {len(affected)} student(s) will be unassigned."
+           if affected else "This cannot be undone.")
+    ctk.CTkLabel(confirm, text=msg,
+                 text_color="#f59e0b" if affected else TEXT_MUTED).pack()
+
+    bf = ctk.CTkFrame(confirm, fg_color="transparent")
+    bf.pack(pady=20)
+
+    def confirm_delete():
+        all_p = read_csv("programs")
+        updated_p = [p for p in all_p if p['code'] != code]
+        write_csv("programs", updated_p)
+        if affected:
+            all_s = read_csv("students")
+            updated_s = []
+            for s in all_s:
+                if s.get('program_code') == code:
+                    s['program_code'] = f"__deleted__{code}"
+                updated_s.append(s)
+            write_csv("students", updated_s)
+        app.current_data = read_csv(app.current_file_key)
+        app.refresh_table(app.current_display_keys)
+        confirm.destroy()
+
+    ctk.CTkButton(bf, text="Yes, Delete", fg_color=ACCENT_RED,
+                  hover_color="#b91c1c", width=120, height=36,
+                  corner_radius=8, command=confirm_delete).pack(side="left", padx=8)
+    ctk.CTkButton(bf, text="Cancel", fg_color=BG_INPUT,
+                  hover_color=BORDER, width=100, height=36,
+                  corner_radius=8, command=confirm.destroy).pack(side="left", padx=8)
+    
 def open_program_form(app, edit_data=None):
     is_edit = edit_data is not None
 
     form = ctk.CTkToplevel(app)
     form.title("Edit Program" if is_edit else "Add Program")
-    form.geometry("420x440")
     form.resizable(False, False)
     form.configure(fg_color=BG_FORM)
     form.attributes("-topmost", True)
+    _w, _h = 420, 440
+    _x = (form.winfo_screenwidth()  - _w) // 2
+    _y = (form.winfo_screenheight() - _h) // 2
+    form.geometry(f"{_w}x{_h}+{_x}+{_y}")
+    form.after(100, form.grab_set)
 
     # Header
     header = ctk.CTkFrame(form, fg_color=BG_BASE, corner_radius=0, height=64)
@@ -97,58 +151,20 @@ def open_program_form(app, edit_data=None):
             updated = [program_data if p['code'] == code else p for p in all_programs]
         else:
             updated = all_programs + [program_data]
+            # Re-link unassigned students back to this program
+            all_students = read_csv("students")
+            relinked_students = []
+            for s in all_students:
+                if s.get('program_code') == f"__deleted__{code}":
+                    s['program_code'] = code
+                relinked_students.append(s)
+            write_csv("students", relinked_students)
 
         write_csv("programs", updated)
-        app.current_data = updated
+        app.current_data = read_csv("programs")
         app.refresh_table(app.current_display_keys)
         form.destroy()
 
-    def handle_delete():
-        code = str(edit_data[0])
-        all_students = read_csv("students")
-        affected = [s for s in all_students if s.get('program_code') == code]
-
-        confirm = ctk.CTkToplevel(form)
-        confirm.title("Confirm Delete")
-        confirm.geometry("340x200")
-        confirm.configure(fg_color=BG_FORM)
-        confirm.attributes("-topmost", True)
-        confirm.resizable(False, False)
-
-        ctk.CTkLabel(confirm, text=f"Delete program '{code}'?",
-                     font=ctk.CTkFont(size=15, weight="bold"),
-                     text_color=TEXT_PRIMARY).pack(pady=(24, 4))
-        msg = (f"⚠  {len(affected)} student(s) will be unassigned."
-               if affected else "This cannot be undone.")
-        ctk.CTkLabel(confirm, text=msg,
-                     text_color="#f59e0b" if affected else TEXT_MUTED).pack()
-
-        bf = ctk.CTkFrame(confirm, fg_color="transparent")
-        bf.pack(pady=20)
-
-        def confirm_delete():
-            all_p = read_csv("programs")
-            updated_p = [p for p in all_p if p['code'] != code]
-            write_csv("programs", updated_p)
-            if affected:
-                all_s = read_csv("students")
-                updated_s = []
-                for s in all_s:
-                    if s.get('program_code') == code:
-                        s['program_code'] = "Unassigned"
-                    updated_s.append(s)
-                write_csv("students", updated_s)
-            app.current_data = updated_p
-            app.refresh_table(app.current_display_keys)
-            confirm.destroy()
-            form.destroy()
-
-        ctk.CTkButton(bf, text="Yes, Delete", fg_color=ACCENT_RED,
-                      hover_color="#b91c1c", width=120, height=36,
-                      corner_radius=8, command=confirm_delete).pack(side="left", padx=8)
-        ctk.CTkButton(bf, text="Cancel", fg_color=BG_INPUT,
-                      hover_color=BORDER, width=100, height=36,
-                      corner_radius=8, command=confirm.destroy).pack(side="left", padx=8)
 
     btn_row = ctk.CTkFrame(body, fg_color="transparent")
     btn_row.pack(fill="x", pady=(12, 0))
@@ -160,8 +176,10 @@ def open_program_form(app, edit_data=None):
                   font=ctk.CTkFont(size=13, weight="bold"),
                   command=handle_save).pack(side="left", padx=(0, 10))
 
-    if is_edit:
-        ctk.CTkButton(btn_row, text="Delete", fg_color=ACCENT_RED,
-                      hover_color="#b91c1c", height=40, corner_radius=8,
-                      width=100, font=ctk.CTkFont(size=13),
-                      command=handle_delete).pack(side="left")
+    ctk.CTkButton(btn_row,
+                  text="Cancel",
+                  fg_color=BG_INPUT, hover_color=BORDER,
+                  height=40, corner_radius=8,
+                  font=ctk.CTkFont(size=13),
+                  text_color=TEXT_MUTED,
+                  command=form.destroy).pack(side="left")

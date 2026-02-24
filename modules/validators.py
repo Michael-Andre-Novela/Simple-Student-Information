@@ -6,13 +6,13 @@ CURRENT_YEAR = datetime.now().year
 MIN_YEAR = 2000  # Earliest valid enrollment year
 
 
-# ── Helpers ────────────────────────────────────────────────────────────────
+# ****************Helpers*****************************************
 
 def is_blank(value):
     return not str(value).strip()
 
 def has_invalid_chars(value, allow_spaces=True, allow_hyphen=False):
-    """Returns True if value contains non-alphabetic characters."""
+  # Returns True if value contains non-alphabetic characters.
     pattern = r"^[a-zA-Z"
     if allow_spaces:
         pattern += r"\s"
@@ -22,7 +22,7 @@ def has_invalid_chars(value, allow_spaces=True, allow_hyphen=False):
     return not re.match(pattern, str(value).strip())
 
 def id_already_exists(id_number, exclude_id=None):
-    """Check if a student ID already exists. Optionally exclude one (for edits)."""
+    #Check if a student ID already exist.
     students = read_csv("students")
     for s in students:
         if str(s['id']) == str(id_number):
@@ -58,7 +58,7 @@ def college_code_exists(code, exclude_code=None):
     return False
 
 
-# ── Student Validator ──────────────────────────────────────────────────────
+# ****************Student Validator ********************************
 
 def validate_student(student_data, skip_id_check=False):
     sid       = str(student_data.get('id', '')).strip()
@@ -129,7 +129,7 @@ def validate_student(student_data, skip_id_check=False):
     return True, "Valid."
 
 
-# ── Program Validator ──────────────────────────────────────────────────────
+# ************ Program Validator ******************
 
 def validate_program(program_data, is_edit=False):
     code    = str(program_data.get('code', '')).strip()
@@ -176,7 +176,7 @@ def validate_program(program_data, is_edit=False):
     return True, "Valid."
 
 
-# ── College Validator ──────────────────────────────────────────────────────
+# *******************College Validator *****************************
 
 def validate_college(college_data, is_edit=False):
     code = str(college_data.get('code', '')).strip()
@@ -214,3 +214,4 @@ def validate_college(college_data, is_edit=False):
             return False, f"College code '{code}' already exists."
 
     return True, "Valid."
+    

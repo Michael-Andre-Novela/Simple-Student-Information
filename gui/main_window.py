@@ -9,7 +9,7 @@ from gui.college_forms import open_college_form
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
-# ── Palette ────────────────────────────────────────────────────────────────
+# ************************************ Palette ************************************
 BG_BASE      = "#0d1117"
 BG_SIDEBAR   = "#161b22"
 BG_CARD      = "#1c2230"
@@ -22,7 +22,6 @@ TEXT_PRIMARY = "#e6edf3"
 TEXT_MUTED   = "#8b949e"
 SELECTED_ROW = "#1d3a5f"
 
-ROWS_PER_PAGE = 10
 
 class MainWindow(ctk.CTk):
     def __init__(self):
@@ -34,7 +33,14 @@ class MainWindow(ctk.CTk):
 
         self.title("Student Information System")
         self.geometry("1200x700")
-        self.minsize(900, 550)
+        self.update_idletasks()
+        try:
+            self.state("zoomed")           # Windows / Mac
+        except:
+            try:
+                self.attributes("-zoomed", True)   # Linux
+            except:
+                pass
 
         self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(1, weight=1)
@@ -46,7 +52,7 @@ class MainWindow(ctk.CTk):
         self.show_students_view()
         self.tree.bind("<<TreeviewSelect>>", self.on_row_select)
 
-    # ── Sidebar ────────────────────────────────────────────────────────────
+    # ************************************Sidebar *************************************
     def _build_sidebar(self):
         self.sidebar_frame = ctk.CTkFrame(self, width=220, corner_radius=0,
                                           fg_color=BG_SIDEBAR)
@@ -98,7 +104,7 @@ class MainWindow(ctk.CTk):
                 btn.configure(fg_color="transparent", text_color=TEXT_PRIMARY,
                               border_width=0)
 
-    # ── Content Frame ──────────────────────────────────────────────────────
+    # ************************************ Content Frame ************************************
     def _build_content_frame(self):
         self.content_frame = ctk.CTkFrame(self, corner_radius=16,
                                           fg_color=BG_CARD)
@@ -129,11 +135,9 @@ class MainWindow(ctk.CTk):
                 pass
 
     def on_row_select(self, event):
-        selected = self.tree.selection()
-        if selected:
-            print(f"Row selected: {self.tree.item(selected)['values']}")
+        pass
 
-    # ── Common Controls ────────────────────────────────────────────────────
+    # ************************************Common Controls ************************************
     def create_common_controls(self, title, accent, search_options, sort_options,
                                file_key, display_keys, add_command=None):
         self.clear_content()
@@ -150,6 +154,14 @@ class MainWindow(ctk.CTk):
         ctk.CTkLabel(header, text=title,
                      font=ctk.CTkFont(size=22, weight="bold"),
                      text_color=TEXT_PRIMARY).pack(side="left")
+
+        self.count_label = ctk.CTkLabel(
+            header, text="",
+            font=ctk.CTkFont(size=11),
+            text_color=TEXT_MUTED,
+            fg_color="#21262d", corner_radius=8
+        )
+        self.count_label.pack(side="right", ipadx=10, ipady=3)
 
         # Row 1 — divider
         ctk.CTkFrame(self.content_frame, height=1,
@@ -193,7 +205,7 @@ class MainWindow(ctk.CTk):
             command=lambda: self.search_view_data(file_key, search_options, display_keys)
         ).pack(side="left")
 
-        # ── Sort controls (right side) ─────────────────────────────────────
+        #  Sort controls (right side) ************************************
         self.sort_var     = ctk.StringVar(value=list(sort_options.keys())[0])
         self.sort_reverse = False  # reset on view switch
 
@@ -231,7 +243,7 @@ class MainWindow(ctk.CTk):
                      text_color=TEXT_MUTED).pack(side="right", padx=(0, 4))
 
     def _toggle_order(self, file_key, sort_options, display_keys):
-        """Toggle between ascending and descending, then re-sort."""
+        #Toggle between ascending and descending, then re-sort.
         self.sort_reverse = not self.sort_reverse
         if self.sort_reverse:
             self.order_btn.configure(text="↓ DESC", text_color=ACCENT_PURP)
@@ -241,7 +253,7 @@ class MainWindow(ctk.CTk):
                             sort_options[self.sort_var.get()],
                             display_keys)
 
-    # ── Treeview ───────────────────────────────────────────────────────────
+    # ************************************Treeview ************************************
     def setup_treeview(self, columns, accent=ACCENT_CYAN):
         all_cols = columns + ("actions",)
 
@@ -269,17 +281,20 @@ class MainWindow(ctk.CTk):
         container.grid(row=3, column=0, sticky="nsew", padx=24, pady=(0, 4))
         container.grid_columnconfigure(0, weight=1)
         container.grid_rowconfigure(0, weight=1)
+        container.grid_rowconfigure(1, weight=0)
 
         self.tree = ttk.Treeview(container, columns=all_cols,
                                  show="headings", style="Modern.Treeview",
                                  selectmode="browse")
-        scrollbar = ctk.CTkScrollbar(container, command=self.tree.yview,
-                                     button_color=accent,
-                                     button_hover_color=BG_CARD)
-        self.tree.configure(yscrollcommand=scrollbar.set)
-
+        v_scroll = ctk.CTkScrollbar(container, command=self.tree.yview,
+                             button_color=accent, button_hover_color=BG_CARD)
+        h_scroll = ctk.CTkScrollbar(container, orientation="horizontal",
+                             command=self.tree.xview,
+                             button_color=accent, button_hover_color=BG_CARD)
+        self.tree.configure(yscrollcommand=v_scroll.set, xscrollcommand=h_scroll.set)
         self.tree.grid(row=0, column=0, sticky="nsew")
-        scrollbar.grid(row=0, column=1, sticky="ns")
+        v_scroll.grid(row=0, column=1, sticky="ns")
+        h_scroll.grid(row=1, column=0, sticky="ew")
 
         for col in all_cols:
             display = col.replace("_", " ").upper()
@@ -295,12 +310,16 @@ class MainWindow(ctk.CTk):
 
         self.tree.tag_configure("oddrow",  background=BG_CARD)
         self.tree.tag_configure("evenrow", background=BG_ROW_ALT)
+        self.tree.tag_configure("empty",   background=BG_CARD, foreground=TEXT_MUTED)
 
         self.tree.unbind("<Button-1>")
         self.tree.bind("<Button-1>", self.on_tree_click)
 
-    # ── Pagination ─────────────────────────────────────────────────────────
+    # ************************************ Pagination ************************************
+
     def setup_pagination(self, display_keys):
+        rows_per_page = self._get_rows_per_page()
+        
         if hasattr(self, 'pagination_frame') and self.pagination_frame.winfo_exists():
             self.pagination_frame.destroy()
 
@@ -310,9 +329,9 @@ class MainWindow(ctk.CTk):
                                    padx=24, pady=(0, 16))
 
         total       = len(self.current_data)
-        total_pages = max(1, -(-total // ROWS_PER_PAGE))
-        start = (self.current_page - 1) * ROWS_PER_PAGE + 1 if total else 0
-        end   = min(self.current_page * ROWS_PER_PAGE, total)
+        total_pages = max(1, -(-total //  rows_per_page))
+        start = (self.current_page - 1) * rows_per_page + 1 if total else 0
+        end   = min(self.current_page * rows_per_page, total)
 
         ctk.CTkLabel(
             self.pagination_frame,
@@ -375,8 +394,8 @@ class MainWindow(ctk.CTk):
             state="normal" if self.current_page < total_pages else "disabled",
             command=lambda: go_to(self.current_page + 1)
         ).pack(side="left", padx=2)
-
-    # ── Views ──────────────────────────────────────────────────────────────
+       
+    # ************************************ Views ************************************
     def show_students_view(self):
         self._set_active_nav(0)
         self.clear_content()
@@ -400,7 +419,8 @@ class MainWindow(ctk.CTk):
                             accent=ACCENT_CYAN)
         self.tree.column("firstname", width=160)
         self.current_data = read_csv("students")
-        self.refresh_table(display_keys)
+        self.update_idletasks() 
+        self.after(150, lambda: self.refresh_table(display_keys))
 
     def show_programs_view(self):
         self._set_active_nav(1)
@@ -408,6 +428,7 @@ class MainWindow(ctk.CTk):
         self.current_page  = 1
         self.sort_reverse  = False
         self.current_data  = read_csv("programs")
+        self.update_idletasks() 
         search_opts  = {"Code": "code", "Name": "name", "College": "college_code"}
         display_keys = ["code", "name", "college_code"]
 
@@ -419,7 +440,7 @@ class MainWindow(ctk.CTk):
                                     display_keys, lambda: open_program_form(self))
         self.setup_treeview(("code", "name", "college_code"), accent=ACCENT_PURP)
         self.tree.column("name", width=420, anchor="w")
-        self.refresh_table(display_keys)
+        self.after(150, lambda: self.refresh_table(display_keys))
 
     def show_colleges_view(self):
         self._set_active_nav(2)
@@ -429,7 +450,7 @@ class MainWindow(ctk.CTk):
         self.current_data  = read_csv("colleges")
         search_opts  = {"Code": "code", "Name": "name"}
         display_keys = ["code", "name"]
-
+        self.update_idletasks() 
         self.current_file_key     = "colleges"
         self.current_display_keys = display_keys[:]
 
@@ -438,9 +459,9 @@ class MainWindow(ctk.CTk):
                                     display_keys, lambda: open_college_form(self))
         self.setup_treeview(("code", "name"), accent=ACCENT_GREEN)
         self.tree.column("name", width=520, anchor="w")
-        self.refresh_table(display_keys)
+        self.after(150, lambda: self.refresh_table(display_keys))
 
-    # ── Data Operations ────────────────────────────────────────────────────
+    # ************************************ Data Operations ************************************
     def sort_view_data(self, file_key, sort_col, display_keys):
         if not hasattr(self, 'current_data') or not self.current_data:
             self.current_data = read_csv(file_key)
@@ -486,6 +507,7 @@ class MainWindow(ctk.CTk):
         self.refresh_table(display_keys)
 
     def refresh_table(self, display_keys):
+        rows_per_page = self._get_rows_per_page()
         try:
             programs_list = read_csv("programs")
             prog_to_col   = {p['code']: p.get('college_code', 'N/A') for p in programs_list}
@@ -494,27 +516,40 @@ class MainWindow(ctk.CTk):
 
         for item in self.tree.get_children():
             self.tree.delete(item)
-
-        start_idx = (self.current_page - 1) * ROWS_PER_PAGE
-        end_idx   = start_idx + ROWS_PER_PAGE
+        
+        start_idx = (self.current_page - 1) * rows_per_page
+        end_idx   = start_idx + rows_per_page
         page_data = self.current_data[start_idx:end_idx]
 
-        for i, s in enumerate(page_data):
-            row_values = []
-            for key in display_keys:
-                if key == "college" and self.current_file_key == "students":
-                    val = prog_to_col.get(s.get('program_code'), "—")
-                else:
-                    val = s.get(key, "—")
-                row_values.append(val)
-            row_values.append("⋯  Actions")
-            tag = "evenrow" if i % 2 == 0 else "oddrow"
-            self.tree.insert("", "end", values=row_values, tags=(tag,))
+        if not page_data:
+            num_cols   = len(display_keys) + 1
+            empty_vals = [""] * num_cols
+            empty_vals[num_cols // 2] = "No records found"
+            self.tree.insert("", "end", values=empty_vals, tags=("empty",))
+        else:
+            for i, s in enumerate(page_data):
+                row_values = []
+                for key in display_keys:
+                    if key == "college" and self.current_file_key == "students":
+                        val = prog_to_col.get(s.get('program_code'), "—")
+                    else:
+                        val = s.get(key, "—")
+                    if isinstance(val, str) and val.startswith("__deleted__"):
+                        val = f"[Deleted] {val[len('__deleted__'):]}"
+                    row_values.append(val)
+                row_values.append("⋯  Actions")
+                tag = "evenrow" if i % 2 == 0 else "oddrow"
+                self.tree.insert("", "end", values=row_values, tags=(tag,))
+
+        if hasattr(self, 'count_label'):
+            total = len(self.current_data)
+            self.count_label.configure(text=f"  {total} record{'s' if total != 1 else ''}  ")
 
         self.setup_pagination(display_keys)
 
-    # ── Edit / Delete ──────────────────────────────────────────────────────
+    # ************************************ Edit / Delete ************************************
     def handle_delete(self, file_key, display_keys):
+        rows_per_page=self._get_rows_per_page()
         selected_item = self.tree.selection()
         if not selected_item:
             return
@@ -526,16 +561,26 @@ class MainWindow(ctk.CTk):
         from modules.database_io import write_csv
         write_csv(file_key, updated_data)
         self.current_data = updated_data
-        total_pages = max(1, -(-len(updated_data) // ROWS_PER_PAGE))
+        
+        total_pages = max(1, -(-len(updated_data) // rows_per_page))
         if self.current_page > total_pages:
             self.current_page = total_pages
         self.refresh_table(display_keys)
+        
 
     def handle_edit(self, file_key, display_keys):
         selected_item = self.tree.selection()
         if not selected_item:
             return
         item_values = self.tree.item(selected_item)['values']
+
+        pk = "id" if file_key == "students" else "code"
+        all_data = read_csv(file_key)
+        raw = next((row for row in all_data if str(row.get(pk)) == str(item_values[0])), None)
+        if raw is None:
+            return
+        raw_values = [raw.get(k, "") for k in display_keys] + ["⋯  Actions"]
+        
         if file_key == "students":
             open_student_form(self, edit_data=item_values)
         elif file_key == "programs":
@@ -543,7 +588,22 @@ class MainWindow(ctk.CTk):
         elif file_key == "colleges":
             open_college_form(self, edit_data=item_values)
 
-    # ── Tree Click & Action Menu ───────────────────────────────────────────
+    def _open_delete_confirm(self):
+        selected_item = self.tree.selection()
+        if not selected_item:
+            return
+        item_values = self.tree.item(selected_item)['values']
+        if self.current_file_key == "students":
+            from gui.student_forms import handle_delete
+            handle_delete(self, item_values)
+        elif self.current_file_key == "programs":
+            from gui.programs_forms import handle_delete
+            handle_delete(self, item_values)
+        elif self.current_file_key == "colleges":
+            from gui.college_forms import handle_delete
+            handle_delete(self, item_values)
+
+    # ************************************ Tree Click & Action Menu ************************************
     def on_tree_click(self, event):
         region = self.tree.identify_region(event.x, event.y)
         if region == "cell":
@@ -586,12 +646,20 @@ class MainWindow(ctk.CTk):
             label="  🗑   Delete Record",
             foreground=ACCENT_RED,
             activebackground=ACCENT_RED, activeforeground="white",
-            command=lambda: self.handle_delete(self.current_file_key,
-                                               self.current_display_keys)
+            command=lambda: self._open_delete_confirm()
         )
-        self.active_menu.post(menu_x, menu_y)
-
-
+        self.active_menu.post(menu_x, menu_y) 
+        
+    def _get_rows_per_page(self):
+            #Calculate how many rows fit in the current treeview height.
+            try:
+                tree_height = self.tree.winfo_height()
+                row_height  = 46  # must match rowheight in setup_treeview
+                rows        = max(1, tree_height // row_height)
+                return rows
+            except:
+                return 10  # fallback
+    
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()

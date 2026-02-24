@@ -33,16 +33,56 @@ def styled_option(parent, values, variable, width=340, accent=ACCENT_CYAN):
                              text_color=TEXT_PRIMARY,
                              dropdown_fg_color="#21262d",
                              dropdown_text_color=TEXT_PRIMARY)
+def handle_delete(app, edit_data):
+    confirm = ctk.CTkToplevel(app)
+    confirm.title("Confirm Delete")
+    confirm.resizable(False, False)
+    confirm.configure(fg_color=BG_FORM)
+    confirm.attributes("-topmost", True)
+    _cw, _ch = 500, 200
+    _cx = (confirm.winfo_screenwidth()  - _cw) // 2
+    _cy = (confirm.winfo_screenheight() - _ch) // 2
+    confirm.geometry(f"{_cw}x{_ch}+{_cx}+{_cy}")
+    confirm.after(100, confirm.grab_set)
 
+    ctk.CTkLabel(confirm,
+                 text=f"Delete student {edit_data[0]}?",
+                 font=ctk.CTkFont(size=15, weight="bold"),
+                 text_color=TEXT_PRIMARY).pack(pady=(24, 4))
+    ctk.CTkLabel(confirm, text="This cannot be undone.",
+                 text_color=TEXT_MUTED).pack()
+
+    bf = ctk.CTkFrame(confirm, fg_color="transparent")
+    bf.pack(pady=20)
+
+    def confirm_delete():
+        all_s = read_csv("students")
+        updated = [s for s in all_s if s['id'] != str(edit_data[0])]
+        write_csv("students", updated)
+        app.current_data = read_csv(app.current_file_key)
+        app.refresh_table(app.current_display_keys)
+        confirm.destroy()
+
+    ctk.CTkButton(bf, text="Yes, Delete", fg_color=ACCENT_RED,
+                  hover_color="#b91c1c", width=120, height=36,
+                  corner_radius=8, command=confirm_delete).pack(side="left", padx=8)
+    ctk.CTkButton(bf, text="Cancel", fg_color=BG_INPUT,
+                  hover_color=BORDER, width=100, height=36,
+                  corner_radius=8, command=confirm.destroy).pack(side="left", padx=8)
+    
 def open_student_form(app, edit_data=None):
     is_edit = edit_data is not None
 
     form = ctk.CTkToplevel(app)
     form.title("Edit Student" if is_edit else "Add Student")
-    form.geometry("420x700")
     form.resizable(False, False)
     form.configure(fg_color=BG_FORM)
     form.attributes("-topmost", True)
+    _w, _h = 420, 700
+    _x = (form.winfo_screenwidth()  - _w) // 2
+    _y = (form.winfo_screenheight() - _h) // 2
+    form.geometry(f"{_w}x{_h}+{_x}+{_y}")
+    form.after(100, form.grab_set)
 
     # Header
     header = ctk.CTkFrame(form, fg_color=BG_BASE, corner_radius=0, height=64)
@@ -150,44 +190,10 @@ def open_student_form(app, edit_data=None):
         else:
             updated = all_students + [student_data]
         write_csv("students", updated)
-        app.current_data = updated
+        app.current_data = read_csv("students")
         app.refresh_table(app.current_display_keys)
         form.destroy()
 
-    # Delete confirm
-    def handle_delete():
-        confirm = ctk.CTkToplevel(form)
-        confirm.title("Confirm Delete")
-        confirm.geometry("340x180")
-        confirm.configure(fg_color=BG_FORM)
-        confirm.attributes("-topmost", True)
-        confirm.resizable(False, False)
-
-        ctk.CTkLabel(confirm,
-                     text=f"Delete student {edit_data[0]}?",
-                     font=ctk.CTkFont(size=15, weight="bold"),
-                     text_color=TEXT_PRIMARY).pack(pady=(24, 4))
-        ctk.CTkLabel(confirm, text="This cannot be undone.",
-                     text_color=TEXT_MUTED).pack()
-
-        bf = ctk.CTkFrame(confirm, fg_color="transparent")
-        bf.pack(pady=20)
-
-        def confirm_delete():
-            all_s = read_csv("students")
-            updated = [s for s in all_s if s['id'] != str(edit_data[0])]
-            write_csv("students", updated)
-            app.current_data = updated
-            app.refresh_table(app.current_display_keys)
-            confirm.destroy()
-            form.destroy()
-
-        ctk.CTkButton(bf, text="Yes, Delete", fg_color=ACCENT_RED,
-                      hover_color="#b91c1c", width=120, height=36,
-                      corner_radius=8, command=confirm_delete).pack(side="left", padx=8)
-        ctk.CTkButton(bf, text="Cancel", fg_color=BG_INPUT,
-                      hover_color=BORDER, width=100, height=36,
-                      corner_radius=8, command=confirm.destroy).pack(side="left", padx=8)
 
     # Buttons
     btn_row = ctk.CTkFrame(body, fg_color="transparent")
@@ -202,11 +208,12 @@ def open_student_form(app, edit_data=None):
         command=handle_save
     ).pack(side="left", padx=(0, 10))
 
-    if is_edit:
-        ctk.CTkButton(
-            btn_row, text="Delete",
-            fg_color=ACCENT_RED, hover_color="#b91c1c",
-            height=40, corner_radius=8, width=100,
-            font=ctk.CTkFont(size=13),
-            command=handle_delete
-        ).pack(side="left")
+    ctk.CTkButton(
+        btn_row,
+        text="Cancel",
+        fg_color=BG_INPUT, hover_color=BORDER,
+        height=40, corner_radius=8,
+        font=ctk.CTkFont(size=13),
+        text_color=TEXT_MUTED,
+        command=form.destroy
+    ).pack(side="left")
