@@ -148,6 +148,8 @@ Re-add college CCS  →  programs: college_code = "CCS"  ✅ restored
 
 ## 📸 Screenshots
 
+> **Note:** Screenshots were taken on Linux. The UI appearance (fonts, window decorations) may differ slightly on Windows.
+
 ### Student Records
 ![Student Records](assets/screenshots/studentsview_inlinux.jpeg)
 
