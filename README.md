@@ -113,7 +113,7 @@ python main.py
 |-------|------|
 | ID | Format `YYYY-NNNN`, year between 2000 and current year, no duplicates |
 | First / Last Name | 2–64 characters, letters only (spaces, hyphens, apostrophes, dots allowed) |
-| Year Level | Integer between 1 and 5 |
+| Year Level | Integer between 1 and 4 |
 | Gender | Male, Female, or Other |
 | Program | Must exist in the programs list |
 

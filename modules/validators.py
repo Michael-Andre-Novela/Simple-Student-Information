@@ -89,8 +89,8 @@ def validate_student(student_data, skip_id_check=False):
         return False, "Year level cannot be empty."
     try:
         year_int = int(year)
-        if not (1 <= year_int <= 5):
-            return False, "Year level must be between 1 and 5."
+        if not (1 <= year_int <= 4):
+            return False, "Year level must be between 1 and 4."
     except ValueError:
         return False, "Year level must be a number."
 

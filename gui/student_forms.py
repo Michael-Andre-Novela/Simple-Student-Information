@@ -130,7 +130,7 @@ def open_student_form(app, edit_data=None):
     gender_menu = styled_option(row2, ["Male", "Female", "Other"],
                                 gender_var, width=162)
     gender_menu.pack(side="left", padx=(0, 16))
-    year_menu = styled_option(row2, ["1", "2", "3", "4", "5"],
+    year_menu = styled_option(row2, ["1", "2", "3", "4"],
                               year_var, width=162)
     year_menu.pack(side="left")
 
