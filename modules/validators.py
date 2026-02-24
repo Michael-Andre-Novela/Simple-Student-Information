@@ -2,34 +2,25 @@ import re
 from datetime import datetime
 from modules.database_io import read_csv
 
-CURRENT_YEAR = datetime.now().year
 MIN_YEAR = 2000  # Earliest valid enrollment year
 
 
-# ****************Helpers*****************************************
+# ── Helpers ────────────────────────────────────────────────────────────────
 
 def is_blank(value):
     return not str(value).strip()
 
-def has_invalid_chars(value, allow_spaces=True, allow_hyphen=False):
-  # Returns True if value contains non-alphabetic characters.
-    pattern = r"^[a-zA-Z"
-    if allow_spaces:
-        pattern += r"\s"
-    if allow_hyphen:
-        pattern += r"\-"
-    pattern += r"]+$"
-    return not re.match(pattern, str(value).strip())
+def _name_invalid(value):
+    """Returns True if a name contains characters outside what is allowed.
+    Permits: letters, spaces, hyphens, apostrophes, periods.
+    Covers names like O'Brien, De La Cruz, Mary-Jane, Jr.
+    """
+    return not re.match(r"^[a-zA-Z\s\-\.']+$", str(value).strip())
 
-def id_already_exists(id_number, exclude_id=None):
-    #Check if a student ID already exist.
+def id_already_exists(id_number):
+    """Check if a student ID already exists."""
     students = read_csv("students")
-    for s in students:
-        if str(s['id']) == str(id_number):
-            if exclude_id and str(id_number) == str(exclude_id):
-                continue
-            return True
-    return False
+    return any(str(s['id']) == str(id_number) for s in students)
 
 def program_exists(program_code):
     programs = read_csv("programs")
@@ -39,28 +30,22 @@ def college_exists(college_code):
     colleges = read_csv("colleges")
     return any(c['code'].upper() == college_code.upper() for c in colleges)
 
-def program_code_exists(code, exclude_code=None):
+def program_code_exists(code):
+    """Check if a program code already exists."""
     programs = read_csv("programs")
-    for p in programs:
-        if p['code'].upper() == code.upper():
-            if exclude_code and code.upper() == exclude_code.upper():
-                continue
-            return True
-    return False
+    return any(p['code'].upper() == code.upper() for p in programs)
 
-def college_code_exists(code, exclude_code=None):
+def college_code_exists(code):
+    """Check if a college code already exists."""
     colleges = read_csv("colleges")
-    for c in colleges:
-        if c['code'].upper() == code.upper():
-            if exclude_code and code.upper() == exclude_code.upper():
-                continue
-            return True
-    return False
+    return any(c['code'].upper() == code.upper() for c in colleges)
 
 
-# ****************Student Validator ********************************
+# ── Student Validator ──────────────────────────────────────────────────────
 
 def validate_student(student_data, skip_id_check=False):
+    current_year = datetime.now().year
+
     sid       = str(student_data.get('id', '')).strip()
     firstname = str(student_data.get('firstname', '')).strip()
     lastname  = str(student_data.get('lastname', '')).strip()
@@ -72,10 +57,12 @@ def validate_student(student_data, skip_id_check=False):
     if not re.match(r'^\d{4}-\d{4}$', sid):
         return False, "ID must be in YYYY-NNNN format (e.g. 2024-0001)."
 
-    # 2. ID year must be realistic
+    # 2. ID year must be realistic; sequence must not be 0000
     id_year = int(sid.split('-')[0])
-    if id_year < MIN_YEAR or id_year > CURRENT_YEAR:
-        return False, f"ID year must be between {MIN_YEAR} and {CURRENT_YEAR}."
+    if id_year < MIN_YEAR or id_year > current_year:
+        return False, f"ID year must be between {MIN_YEAR} and {current_year}."
+    if sid.split('-')[1] == '0000':
+        return False, "ID sequence cannot be 0000."
 
     # 3. First name checks
     if is_blank(firstname):
@@ -84,8 +71,8 @@ def validate_student(student_data, skip_id_check=False):
         return False, "First name must be at least 2 characters."
     if len(firstname) > 64:
         return False, "First name must be under 64 characters."
-    if re.search(r'[0-9@#$%^&*()_+=\[\]{};:\'",.<>?/\\|`~]', firstname):
-        return False, "First name must not contain numbers or special characters."
+    if _name_invalid(firstname):
+        return False, "First name can only contain letters, spaces, hyphens, apostrophes, or periods."
 
     # 4. Last name checks
     if is_blank(lastname):
@@ -94,8 +81,8 @@ def validate_student(student_data, skip_id_check=False):
         return False, "Last name must be at least 2 characters."
     if len(lastname) > 64:
         return False, "Last name must be under 64 characters."
-    if re.search(r'[0-9@#$%^&*()_+=\[\]{};:\'",.<>?/\\|`~]', lastname):
-        return False, "Last name must not contain numbers or special characters."
+    if _name_invalid(lastname):
+        return False, "Last name can only contain letters, spaces, hyphens, apostrophes, or periods."
 
     # 5. Year level
     if is_blank(year):
@@ -129,7 +116,7 @@ def validate_student(student_data, skip_id_check=False):
     return True, "Valid."
 
 
-# ************ Program Validator ******************
+# ── Program Validator ──────────────────────────────────────────────────────
 
 def validate_program(program_data, is_edit=False):
     code    = str(program_data.get('code', '')).strip()
@@ -176,7 +163,7 @@ def validate_program(program_data, is_edit=False):
     return True, "Valid."
 
 
-# *******************College Validator *****************************
+# ── College Validator ──────────────────────────────────────────────────────
 
 def validate_college(college_data, is_edit=False):
     code = str(college_data.get('code', '')).strip()
@@ -187,6 +174,8 @@ def validate_college(college_data, is_edit=False):
         return False, "College code cannot be empty."
 
     # 2. Code length
+    if len(code) < 2:
+        return False, "College code must be at least 2 characters."
     if len(code) > 16:
         return False, "College code must be under 16 characters."
 

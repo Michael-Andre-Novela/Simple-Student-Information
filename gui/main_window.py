@@ -1,7 +1,7 @@
 from tkinter import ttk
 import tkinter as tk
 import customtkinter as ctk
-from modules.database_io import read_csv, sort
+from modules.database_io import read_csv
 from gui.student_forms import open_student_form
 from gui.programs_forms import open_program_form
 from gui.college_forms import open_college_form

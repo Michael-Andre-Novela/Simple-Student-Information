@@ -35,61 +35,71 @@ def initialize_storage():
 def read_csv(file_key):
     file_path = FILES[file_key]
     data = []
-    with open(file_path, 'r', newline='') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            data.append(row)
+    try:
+        with open(file_path, 'r', newline='') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                data.append(row)
+    except (FileNotFoundError, OSError):
+        pass
     return data
 
 def write_csv(file_key, data):
     file_path = FILES[file_key]
-    with open(file_path, 'w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=Headers[file_key])
-        writer.writeheader()
-        for row in data:
-            writer.writerow(row)
+    try:
+        with open(file_path, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=Headers[file_key])
+            writer.writeheader()
+            for row in data:
+                writer.writerow(row)
+        return True
+    except OSError:
+        return False
+
+
+def get_pk(file_key):
+    """Return the primary key column name for a given file key."""
+    return 'id' if file_key == 'students' else 'code'
+
+
+def add_csv(file_key, row):
+    """Append a single new row to a CSV file."""
+    data = read_csv(file_key)
+    data.append(row)
+    write_csv(file_key, data)
+    return data
 
 
 def search_csv(file_key, search_query, column=None):
-       data = read_csv(file_key)
-       search_query = search_query.lower()
-       results =[]
-       for row in data:
-            if column:
-                if search_query in str(row[column]).lower():
-                 results.append(row)
-            else:
-                if any(search_query in str(val).lower() for val in row.values()):
-                 results.append(row)
-                
-       return results
-
-def delete_csv(file_key, id_value, id_column='id'): # Default to 'id' for students
     data = read_csv(file_key)
-    updated_data = []
-
+    search_query = search_query.lower()
+    results = []
     for row in data:
-        # If the current row's ID is NOT the one we want to delete, keep it
-        if row[id_column] != id_value:
-            updated_data.append(row)
-            
-    # Save the NEW list (the one missing the deleted row)
-    write_csv(file_key, updated_data) 
+        if column:
+            if search_query in str(row[column]).lower():
+                results.append(row)
+        else:
+            if any(search_query in str(val).lower() for val in row.values()):
+                results.append(row)
+    return results
+
+def delete_csv(file_key, id_value, id_column=None):
+    if id_column is None:
+        id_column = get_pk(file_key)
+    data = read_csv(file_key)
+    updated_data = [row for row in data if row[id_column] != id_value]
+    write_csv(file_key, updated_data)
     return updated_data
 
-def update_csv(file_key, id_value,updated_row, id_column='id' ):
+def update_csv(file_key, id_value, updated_row, id_column=None):
+    if id_column is None:
+        id_column = get_pk(file_key)
     data = read_csv(file_key)
-    new_list=[]
-
-    for row in data:
-        if row[id_column] == id_value:
-            new_list.append(updated_row)
-        else:
-            new_list.append(row)
+    new_list = [updated_row if row[id_column] == id_value else row for row in data]
     write_csv(file_key, new_list)
     return new_list
 
-def sort(file_key, sort_by_column, reverse=False):
-    data=read_csv(file_key)
-    return sorted(data, key=lambda x: x[sort_by_column].lower(),reverse=reverse)
+def sort_csv(file_key, sort_by_column, reverse=False):
+    data = read_csv(file_key)
+    return sorted(data, key=lambda x: x[sort_by_column].lower(), reverse=reverse)
     
