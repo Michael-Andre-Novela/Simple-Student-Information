@@ -83,7 +83,7 @@ Simple-Student-Information/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/Michael-Andre-Novela/Simple-Student-Information.git)
+git clone https://github.com/Michael-Andre-Novela/Simple-Student-Information.git
 cd Simple-Student-Information
 ```
 
